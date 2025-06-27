@@ -242,15 +242,29 @@
     <img src="https://cdn-icons-png.flaticon.com/512/220/220236.png" alt="WhatsApp">
   </a>
 
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
   <script>
-    // --- NUEVO: Cargar imágenes desde localStorage o default ---
+    // Configuración Firebase (igual que admin)
+    const firebaseConfig = {
+      apiKey: "AIzaSyD6NB2f4icoKBA7VV8KEd-oJLdV7EjdMzA",
+      authDomain: "pinki-dinkis.firebaseapp.com",
+      projectId: "pinki-dinkis",
+      storageBucket: "pinki-dinkis.appspot.com",
+      messagingSenderId: "761142113629",
+      appId: "1:761142113629:web:4b830798bd55d1fef6e4b4",
+      measurementId: "G-KEMSRF6K52",
+      databaseURL: "https://pinki-dinkis-default-rtdb.firebaseio.com"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+
     const categoriasGaleria = [
-      { key: 'animadores', nombre: 'ANIMADORES INFANTILES', icono: '🎪', desc: '¡Diversión garantizada para todos los niños!' },
+      { key: 'animadores', nombre: 'ANIMADORES INFANTILES', icono: '��', desc: '¡Diversión garantizada para todos los niños!' },
       { key: 'pintacaritas', nombre: 'PINTA CARITAS', icono: '🎨', desc: 'Transformamos a los niños en sus personajes favoritos' },
       { key: 'belyybeto', nombre: 'BELY Y BETO', icono: '🎭', desc: 'Bely y Beto los más divertidos de la ciudad' },
       { key: 'spiderman', nombre: 'SHOW DE SPIDERMAN', icono: '🕷️', desc: '¡Tu héroe favorito en tu fiesta!' },
       { key: 'personajes', nombre: 'PERSONAJES', icono: '🎭', desc: 'Una gran variedad de personajes para tu evento' },
-     
     ];
     const galeriaDefault = {
       animadores: [
@@ -284,51 +298,57 @@
         'https://i.imgur.com/I2goapV.jpeg'
       ]
     };
-    function cargarGaleriaPublica() {
-      const data = localStorage.getItem('galeriaAdmin');
-      return data ? JSON.parse(data) : JSON.parse(JSON.stringify(galeriaDefault));
+    function cargarGaleriaPublica(callback) {
+      database.ref('galeria').once('value').then(snapshot => {
+        const data = snapshot.val();
+        if (data) {
+          callback(data);
+        } else {
+          callback(JSON.parse(JSON.stringify(galeriaDefault)));
+        }
+      });
     }
     function renderGaleriaPublica() {
-      const galeria = cargarGaleriaPublica();
-      const grid = document.getElementById('galeria-publica');
-      grid.innerHTML = '';
-      categoriasGaleria.forEach(cat => {
-        const banner = document.createElement('div');
-        banner.className = 'banner';
-        // Slider
-        const slider = document.createElement('div');
-        slider.className = 'slider';
-        const slidesDiv = document.createElement('div');
-        slidesDiv.className = 'slides';
-        (galeria[cat.key] || []).forEach((url, i) => {
-          const img = document.createElement('img');
-          img.src = url;
-          img.alt = `${cat.nombre} ${i+1}`;
-          slidesDiv.appendChild(img);
+      cargarGaleriaPublica(function(galeria) {
+        const grid = document.getElementById('galeria-publica');
+        grid.innerHTML = '';
+        categoriasGaleria.forEach(cat => {
+          const banner = document.createElement('div');
+          banner.className = 'banner';
+          // Slider
+          const slider = document.createElement('div');
+          slider.className = 'slider';
+          const slidesDiv = document.createElement('div');
+          slidesDiv.className = 'slides';
+          (galeria[cat.key] || []).forEach((url, i) => {
+            const img = document.createElement('img');
+            img.src = url;
+            img.alt = `${cat.nombre} ${i+1}`;
+            slidesDiv.appendChild(img);
+          });
+          slider.appendChild(slidesDiv);
+          // Botones y marcadores
+          const prev = document.createElement('button');
+          prev.className = 'prev';
+          prev.innerHTML = '&#10094;';
+          const next = document.createElement('button');
+          next.className = 'next';
+          next.innerHTML = '&#10095;';
+          const indicadores = document.createElement('div');
+          indicadores.className = 'indicadores';
+          slider.appendChild(prev);
+          slider.appendChild(next);
+          slider.appendChild(indicadores);
+          banner.appendChild(slider);
+          // Banner content
+          const content = document.createElement('div');
+          content.className = 'banner-content';
+          content.innerHTML = `<h2>${cat.icono} ${cat.nombre}</h2><p>${cat.desc}</p>`;
+          banner.appendChild(content);
+          grid.appendChild(banner);
         });
-        slider.appendChild(slidesDiv);
-        // Botones y marcadores
-        const prev = document.createElement('button');
-        prev.className = 'prev';
-        prev.innerHTML = '&#10094;';
-        const next = document.createElement('button');
-        next.className = 'next';
-        next.innerHTML = '&#10095;';
-        const indicadores = document.createElement('div');
-        indicadores.className = 'indicadores';
-        slider.appendChild(prev);
-        slider.appendChild(next);
-        slider.appendChild(indicadores);
-        banner.appendChild(slider);
-        // Banner content
-        const content = document.createElement('div');
-        content.className = 'banner-content';
-        content.innerHTML = `<h2>${cat.icono} ${cat.nombre}</h2><p>${cat.desc}</p>`;
-        banner.appendChild(content);
-        grid.appendChild(banner);
+        setTimeout(inicializarSliders, 100);
       });
-      // Inicializar sliders
-      setTimeout(inicializarSliders, 100);
     }
     function inicializarSliders() {
       document.querySelectorAll('.banner').forEach(banner => {
@@ -361,7 +381,6 @@
         nextBtn.addEventListener('click', () => showSlide(index + 1));
       });
     }
-    // Renderizar galería al cargar
     document.addEventListener('DOMContentLoaded', function() {
       const grid = document.getElementById('galeria-publica');
       if (grid) {
@@ -371,7 +390,7 @@
         if (typeof renderGaleriaPublica === 'function') renderGaleriaPublica();
         const loader = document.getElementById('loader-galeria');
         if (loader) loader.remove();
-      }, 400); // Simula carga rápida
+      }, 400);
     });
   </script>
 </body>
