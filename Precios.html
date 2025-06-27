@@ -1,0 +1,1134 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Precios - Pinki Dinkis</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Comic Sans MS', cursive, sans-serif;
+      background: linear-gradient(135deg, #9fefe1 0%, #a8fea5 25%, #f6f7a7 50%, #f38592 75%, #fba0e9 100%);
+      background-attachment: fixed;
+      min-height: 100vh;
+    }
+
+    .header-precios {
+      text-align: center;
+      padding: 40px 20px;
+      background: linear-gradient(45deg, #f9a6c8 0%, #f1befc 25%, #fed0b1 50%, #fdfdab 75%, #f3ade5 100%);
+      box-shadow: 0 4px 10px rgba(84, 196, 240, 0.941);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .header-precios::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(90deg, transparent 0%, rgba(155, 222, 250, 0.913) 50%, transparent 100%);
+      animation: shimmer 3s ease-in-out infinite;
+    }
+
+    @keyframes shimmer {
+      0%, 100% { transform: translateX(-100%); }
+      50% { transform: translateX(100%); }
+    }
+
+    .header-precios h1 {
+      font-size: 36px;
+      color: #ff69b4;
+      text-shadow: 2px 2px 5px rgba(255, 105, 180, 0.3);
+      margin: 0;
+      position: relative;
+      z-index: 1;
+    }
+
+    .header-precios p {
+      font-size: 18px;
+      color: #555;
+      margin: 10px 0 0 0;
+      position: relative;
+      z-index: 1;
+    }
+
+    .info-evento {
+      background: rgb(254, 204, 247);
+      margin: 20px auto;
+      padding: 20px;
+      border-radius: 15px;
+      box-shadow: 0 5px 15px rgba(246, 135, 9, 0.909);
+      max-width: 600px;
+      text-align: center;
+    }
+
+    .info-evento h3 {
+      color: #ff69b4;
+      margin-bottom: 15px;
+    }
+
+    .info-evento p {
+      margin: 5px 0;
+      color: #666;
+    }
+
+    .contenedor-precios {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    .servicio-precio {
+      background: rgb(238, 191, 247);
+      margin: 20px 0;
+      border-radius: 20px;
+      box-shadow: 0 8px 25px rgba(104, 202, 244, 0.897);
+      overflow: hidden;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .servicio-precio:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 12px 35px rgba(117, 183, 237, 0.868);
+    }
+
+    .titulo-servicio {
+      background: linear-gradient(45deg, #ff69b4, #ff85c1);
+      color: white;
+      padding: 20px;
+      text-align: center;
+      font-size: 24px;
+      font-weight: bold;
+      text-shadow: 1px 1px 3px rgba(0,0,0,0.3);
+    }
+
+    .galeria-precios {
+      padding: 20px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+    }
+
+    .imagen-precio {
+      text-align: center;
+      cursor: pointer;
+      transition: transform 0.3s ease;
+    }
+
+    .imagen-precio:hover {
+      transform: scale(1.05);
+    }
+
+    .imagen-precio img {
+      width: 100%;
+      max-width: 300px;
+      height: auto;
+      border-radius: 15px;
+      box-shadow: 0 5px 15px rgba(78, 173, 231, 0.872);
+    }
+
+    .precio-info {
+      margin-top: 15px;
+      text-align: center;
+      padding: 10px;
+      background: linear-gradient(45deg, #f9aaca, #fff0f5);
+      border-radius: 10px;
+      border: 2px solid #ffb6c1;
+    }
+
+    .precio-info h4 {
+      color: #ff69b4;
+      margin: 0 0 5px 0;
+      font-size: 18px;
+      font-weight: bold;
+    }
+
+    .precio-texto {
+      color: #d63384;
+      margin: 0;
+      font-size: 16px;
+      font-weight: bold;
+    }
+
+    .boton-regresar {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      background: linear-gradient(45deg, #ff69b4, #ff85c1);
+      color: white;
+      padding: 12px 20px;
+      border: none;
+      border-radius: 25px;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(105, 235, 255, 0.903);
+      transition: transform 0.3s ease;
+      z-index: 1000;
+    }
+
+    .boton-regresar:hover {
+      transform: scale(1.05);
+    }
+
+    .whatsapp-float {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 9999;
+    }
+
+    .whatsapp-float img {
+      width: 60px;
+      transition: transform 0.3s ease;
+    }
+
+    .whatsapp-float:hover img {
+      transform: scale(1.1);
+    }
+
+    /* Estilos para el formulario de agendar */
+    .formulario-popup {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(5px);
+      z-index: 10000;
+      overflow-y: auto;
+    }
+
+    .formulario-content {
+      background: linear-gradient(135deg, #ffe6f0 0%, #fff0f5 50%, #ffeef2 100%);
+      margin: 20px auto;
+      padding: 30px;
+      border-radius: 25px;
+      max-width: 600px;
+      width: 90%;
+      box-shadow: 0 20px 40px rgba(101, 196, 247, 0.894);
+      border: 3px solid #ff69b4;
+      position: relative;
+    }
+
+    .formulario-header {
+      text-align: center;
+      margin-bottom: 25px;
+    }
+
+    .formulario-header h3 {
+      color: #ff69b4;
+      font-size: 28px;
+      margin: 0;
+      text-shadow: 1px 1px 2px rgba(255, 105, 180, 0.2);
+    }
+
+    .formulario-header .close-form {
+      position: absolute;
+      right: 20px;
+      top: 20px;
+      font-size: 28px;
+      color: #ff69b4;
+      cursor: pointer;
+      transition: color 0.3s;
+    }
+
+    .formulario-header .close-form:hover {
+      color: #d63384;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      color: #d63384;
+      font-weight: bold;
+      font-size: 14px;
+    }
+
+    .form-group input,
+    .form-group select {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #ffb6c1;
+      border-radius: 10px;
+      font-size: 16px;
+      transition: border-color 0.3s, box-shadow 0.3s;
+      box-sizing: border-box;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus {
+      outline: none;
+      border-color: #ff69b4;
+      box-shadow: 0 0 10px rgba(255, 105, 180, 0.3);
+    }
+
+    .btn-submit {
+      width: 100%;
+      background: linear-gradient(45deg, #ff69b4, #ff85c1);
+      color: white;
+      padding: 15px;
+      border: none;
+      border-radius: 25px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: transform 0.3s, box-shadow 0.3s;
+      margin-top: 10px;
+    }
+
+    .btn-submit:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(255, 105, 180, 0.4);
+    }
+
+    .btn-ubicacion {
+      background: linear-gradient(45deg, #4CAF50, #66BB6A);
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 20px;
+      font-size: 14px;
+      cursor: pointer;
+      margin: 10px 0;
+      transition: transform 0.3s;
+    }
+
+    .btn-ubicacion:hover {
+      transform: translateY(-2px);
+    }
+
+    .info-seleccion {
+      background: linear-gradient(45deg, #ffe6f0, #fff0f5);
+      padding: 15px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      text-align: center;
+      border: 2px solid #ff69b4;
+    }
+
+    .info-seleccion h4 {
+      color: #ff69b4;
+      margin: 0 0 10px 0;
+    }
+
+    .info-seleccion p {
+      margin: 5px 0;
+      color: #666;
+    }
+
+    /* Estilos para el mensaje de confirmación */
+    .mensaje-confirmacion {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(5px);
+      z-index: 10000;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      animation: fadeIn 0.3s ease-out;
+    }
+
+    .confirmacion-content {
+      background: linear-gradient(135deg, #ffe6f0 0%, #fff0f5 50%, #ffeef2 100%);
+      padding: 40px;
+      border-radius: 25px;
+      text-align: center;
+      max-width: 500px;
+      width: 90%;
+      box-shadow: 0 20px 40px rgba(255, 105, 180, 0.3);
+      border: 3px solid #ff69b4;
+      animation: slideInUp 0.5s ease-out;
+    }
+
+    @keyframes slideInUp {
+      from {
+        opacity: 0;
+        transform: translateY(50px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .confirmacion-icon {
+      font-size: 60px;
+      margin-bottom: 20px;
+      animation: bounce 1s ease-in-out;
+    }
+
+    @keyframes bounce {
+      0%, 20%, 50%, 80%, 100% {
+        transform: translateY(0);
+      }
+      40% {
+        transform: translateY(-20px);
+      }
+      60% {
+        transform: translateY(-10px);
+      }
+    }
+
+    .confirmacion-content h3 {
+      color: #ff69b4;
+      font-size: 28px;
+      margin-bottom: 15px;
+      text-shadow: 1px 1px 2px rgba(255, 105, 180, 0.2);
+    }
+
+    .confirmacion-content p {
+      color: #666;
+      font-size: 16px;
+      margin-bottom: 20px;
+      line-height: 1.5;
+    }
+
+    .confirmacion-details {
+      background: rgba(255, 182, 193, 0.1);
+      padding: 20px;
+      border-radius: 15px;
+      margin: 20px 0;
+      border: 2px solid rgba(255, 105, 180, 0.2);
+    }
+
+    .confirmacion-details p {
+      margin: 10px 0;
+      color: #d63384;
+      font-size: 14px;
+    }
+
+    .confirmacion-buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      margin-top: 25px;
+    }
+
+    .btn-ver-evento, .btn-nuevo-evento {
+      padding: 15px 25px;
+      border: none;
+      border-radius: 25px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    .btn-ver-evento {
+      background: linear-gradient(45deg, #ff69b4, #ff85c1);
+      color: white;
+      box-shadow: 0 4px 15px rgba(255, 105, 180, 0.3);
+    }
+
+    .btn-ver-evento:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(255, 105, 180, 0.4);
+    }
+
+    .btn-nuevo-evento {
+      background: linear-gradient(45deg, #4CAF50, #66BB6A);
+      color: white;
+      box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+    }
+
+    .btn-nuevo-evento:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
+    }
+
+    .btn-regresar-principal {
+      background: linear-gradient(45deg, #6c757d, #868e96);
+      color: white;
+      box-shadow: 0 4px 15px rgba(108, 117, 125, 0.3);
+    }
+
+    .btn-regresar-principal:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(108, 117, 125, 0.4);
+    }
+
+    @media (max-width: 768px) {
+      .header-precios h1 {
+        font-size: 28px;
+      }
+      
+      .galeria-precios {
+        grid-template-columns: 1fr;
+      }
+      
+      .boton-regresar {
+        top: 10px;
+        left: 10px;
+        padding: 10px 15px;
+        font-size: 14px;
+      }
+
+      .formulario-content {
+      margin: 10px;
+        padding: 20px;
+      }
+
+      .confirmacion-content {
+        padding: 30px 20px;
+        margin: 20px;
+      }
+      
+      .confirmacion-buttons {
+        flex-direction: column;
+      }
+      
+      .btn-ver-evento, .btn-nuevo-evento {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Botón regresar -->
+  
+
+  <!-- Header -->
+  <header class="header-precios">
+    <h1>💰 Precios de nuestros Servicios 💰</h1>
+    
+    <button class="btn-ver-evento" onclick="window.location.href='productos.html'" style="margin-top: 20px;">
+      Regresar a Productos
+    </button>
+  </header>
+
+  <!-- Información del evento -->
+  <div class="info-evento">
+    <h3>📋 Información de tu consulta</h3>
+    <p><strong>Municipio:</strong> <span id="municipio-mostrar"></span></p>
+    <p><strong>Fecha:</strong> <span id="fecha-mostrar"></span></p>
+    <p><strong>Servicio:</strong> <span id="servicio-mostrar"></span></p>
+  </div>
+
+  <!-- Contenedor de precios -->
+  <div class="contenedor-precios" id="contenedor-precios">
+    <!-- Los precios se cargarán dinámicamente aquí -->
+  </div>
+
+  <!-- Formulario de agendar eventos -->
+  <div id="formulario-agendar" class="formulario-popup">
+    <div class="formulario-content">
+      <div class="formulario-header">
+        <span class="close-form" onclick="cerrarFormulario()">&times;</span>
+        <h3>🎉 Agenda tu evento</h3>
+      </div>
+      
+      <div id="info-seleccion" class="info-seleccion">
+        <!-- Información del paquete seleccionado -->
+      </div>
+
+      <form id="form-agendar">
+        <div class="form-group">
+          <label for="persona">💥 Persona que contrata</label>
+          <input type="text" id="persona" required placeholder="Ej: María González">
+        </div>
+        
+        <div class="form-group">
+          <label for="telefono1">💥 Número de teléfono</label>
+          <input type="tel" id="telefono1" required pattern="[0-9]{10}" maxlength="10" placeholder="Ej: 5512345678">
+        </div>
+        
+        <div class="form-group">
+          <label for="telefono2">💥 Segunda opción teléfono (opcional)</label>
+          <input type="tel" id="telefono2" pattern="[0-9]{10}" maxlength="10" placeholder="Ej: 5512345678">
+        </div>
+        
+        <div class="form-group">
+          <label for="hora">💥 Hora del evento</label>
+          <input type="time" id="hora" required>
+          <small style="color: #666; font-size: 12px; display: block; margin-top: 5px;">
+            🕐 Formato: HH:MM (Ej: 2:00 PM, 6:30 PM, 10:00 AM)
+          </small>
+        </div>
+        
+        <div class="form-group">
+          <label for="tematica">💥 Temática del evento</label>
+          <input type="text" id="tematica" required placeholder="Ej: Princesas, Superhéroes, etc.">
+        </div>
+        
+        <div class="form-group">
+          <label for="festejados">💥 Nombre(s) del festejado(s)</label>
+          <input type="text" id="festejados" required placeholder="Ej: Ana, Carlos">
+        </div>
+        
+        <div class="form-group">
+          <label for="genero">💥 Niño o Niña?</label>
+          <select id="genero" required>
+            <option value="">Selecciona una opción</option>
+            <option value="Niño">Niño</option>
+            <option value="Niña">Niña</option>
+            <option value="Ambos">Ambos</option>
+      </select>
+        </div>
+        
+        <div class="form-group">
+          <label for="direccion">💥 Dirección escrita</label>
+          <input type="text" id="direccion" required placeholder="Ej: Calle Principal #123, Colonia">
+        </div>
+        
+        <div class="form-group">
+          <label for="especificaciones">💥 Algunas especificaciones del show (opcional)</label>
+          <input type="text" id="especificaciones" placeholder="Ej: Preferencia de colores, actividades especiales">
+        </div>
+        
+        <button type="button" class="btn-ubicacion" onclick="obtenerUbicacion()">📍 Compartir ubicación actual</button>
+        
+        <div class="form-group">
+          <label for="ubicacion">Ubicación actual</label>
+          <input type="text" id="ubicacion" readonly placeholder="Se obtendrá automáticamente">
+        </div>
+
+        <button type="submit" class="btn-submit">🎉 Agendar Evento</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Mensaje de confirmación -->
+  <div id="mensaje-confirmacion" class="mensaje-confirmacion" style="display:none;">
+    <div class="confirmacion-content">
+      <div class="confirmacion-icon">🎉</div>
+      <h3>¡Evento Agendado con Éxito!</h3>
+      <p>Tu evento ha sido registrado correctamente en nuestro sistema.</p>
+      <div class="confirmacion-details">
+        <p><strong>📞 Nos pondremos en contacto contigo unos días antes del evento para reconfirmar todos los detalles.</strong></p>
+        <p><strong>📱 Recibirás un mensaje de WhatsApp con la confirmación.</strong></p>
+        <p><strong>🎈 Si deseas visualizar tu evento lo puedes hacer en la pagina principal en inicio de secion</strong></p>
+      </div>
+      <div class="confirmacion-buttons">
+  
+  
+        <button class="btn-regresar-principal" onclick="regresarPrincipal()">
+          Regresar 
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- WhatsApp -->
+  <a href="https://wa.me/525633313462" target="_blank" class="whatsapp-float" title="¡Chatea con nosotros!">
+    <img src="https://cdn-icons-png.flaticon.com/512/220/220236.png" alt="WhatsApp">
+  </a>
+
+  <script>
+    // Configuración de Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyD6NB2f4icoKBA7VV8KEd-oJLdV7EjdMzA",
+      authDomain: "pinki-dinkis.firebaseapp.com",
+      projectId: "pinki-dinkis",
+      storageBucket: "pinki-dinkis.appspot.com",
+      messagingSenderId: "761142113629",
+      appId: "1:761142113629:web:4b830798bd55d1fef6e4b4",
+      measurementId: "G-KEMSRF6K52",
+      databaseURL: "https://pinki-dinkis-default-rtdb.firebaseio.com"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    // Lista de productos (se cargará desde Firebase)
+    let productos = [];
+
+    // Cargar productos desde Firebase
+    function cargarProductosDesdeFirebase() {
+      return db.ref('productos').once('value').then(snapshot => {
+        const data = snapshot.val();
+        if (data) {
+          productos = Object.values(data);
+        } else {
+          // Si no hay productos en Firebase, usar la lista por defecto
+          productos = [
+            {
+              nombre: "ANIMADOR@ INFANTIL",
+              imagen: "https://i.imgur.com/5pc5QzK.jpeg",
+              precios: [
+                "https://i.imgur.com/CTfmji2.jpeg",
+                "https://i.imgur.com/yFosOMa.jpeg",
+                "https://i.imgur.com/I2goapV.jpeg",
+                "https://i.imgur.com/kneT7uz.jpeg"
+              ]
+            },
+            {
+              nombre: "PINTA CARITAS",
+              imagen: "https://i.imgur.com/VFUwbCP.jpeg",
+              precios: [
+                "https://i.imgur.com/g0YRYPn.jpeg",
+                "https://i.imgur.com/HLlKDkf.jpeg",
+                "https://i.imgur.com/Cl4a3Iq.jpeg"
+              ]
+            },
+            {
+              nombre: "BELY Y BETO",
+              imagen: "https://i.imgur.com/MxyqdNM.jpeg",
+              precios: [
+                "https://i.imgur.com/kCx4Bzv.jpeg",
+                "https://i.imgur.com/4mJ9V28.jpeg",
+                "https://i.imgur.com/YYd6I3h.jpeg"
+              ]
+            },
+            {
+              nombre: "SHOW DE SPIDERMAN",
+              imagen: "https://i.imgur.com/Zrr9ok2.jpeg",
+              precios: [
+                "https://via.placeholder.com/150/FFD700?text=Personaje1",
+                "https://via.placeholder.com/150/FFD700?text=Personaje2",
+                "https://via.placeholder.com/150/FFD700?text=Personaje3",
+                "https://via.placeholder.com/150/FFD700?text=Personaje4",
+                "https://via.placeholder.com/150/FFD700?text=Personaje5"
+              ]
+            },
+            {
+              nombre: "PERSONAJES",
+              imagen: "https://i.imgur.com/5pc5QzK.jpeg",
+              precios: [
+                "https://i.imgur.com/CTfmji2.jpeg",
+                "https://i.imgur.com/yFosOMa.jpeg",
+                "https://i.imgur.com/I2goapV.jpeg",
+                "https://i.imgur.com/kneT7uz.jpeg"
+              ]
+            },
+            {
+              nombre: "INFLABLES",
+              imagen: "https://i.imgur.com/5pc5QzK.jpeg",
+              precios: [
+                "https://i.imgur.com/CTfmji2.jpeg",
+                "https://i.imgur.com/yFosOMa.jpeg",
+                "https://i.imgur.com/I2goapV.jpeg",
+                "https://i.imgur.com/kneT7uz.jpeg"
+              ]
+            },
+            {
+              nombre: "ARMA TU PAQUETE",
+              imagen: "https://i.imgur.com/5pc5QzK.jpeg",
+              precios: [
+                "https://i.imgur.com/CTfmji2.jpeg",
+                "https://i.imgur.com/yFosOMa.jpeg",
+                "https://i.imgur.com/I2goapV.jpeg",
+                "https://i.imgur.com/kneT7uz.jpeg"
+              ]
+            }
+          ];
+        }
+        
+        // Después de cargar los productos, mostrar los precios
+        const datos = cargarDatosDesdeURL();
+        if (datos.servicio && datos.servicio !== 'Todos los servicios') {
+          mostrarServicioSeleccionado();
+        } else {
+          mostrarTodosLosPrecios();
+        }
+      }).catch(error => {
+        console.error("Error al cargar productos:", error);
+        // En caso de error, usar la lista por defecto
+        productos = [
+          {
+            nombre: "ANIMADOR@ INFANTIL",
+            imagen: "https://i.imgur.com/5pc5QzK.jpeg",
+            precios: [
+              "https://i.imgur.com/CTfmji2.jpeg",
+              "https://i.imgur.com/yFosOMa.jpeg",
+              "https://i.imgur.com/I2goapV.jpeg",
+              "https://i.imgur.com/kneT7uz.jpeg"
+            ]
+          },
+          {
+            nombre: "PINTA CARITAS",
+            imagen: "https://i.imgur.com/VFUwbCP.jpeg",
+            precios: [
+              "https://i.imgur.com/g0YRYPn.jpeg",
+              "https://i.imgur.com/HLlKDkf.jpeg",
+              "https://i.imgur.com/Cl4a3Iq.jpeg"
+            ]
+          },
+          {
+            nombre: "BELY Y BETO",
+            imagen: "https://i.imgur.com/MxyqdNM.jpeg",
+            precios: [
+              "https://i.imgur.com/kCx4Bzv.jpeg",
+              "https://i.imgur.com/4mJ9V28.jpeg",
+              "https://i.imgur.com/YYd6I3h.jpeg"
+            ]
+          },
+          {
+            nombre: "SHOW DE SPIDERMAN",
+            imagen: "https://i.imgur.com/Zrr9ok2.jpeg",
+            precios: [
+              "https://via.placeholder.com/150/FFD700?text=Personaje1",
+              "https://via.placeholder.com/150/FFD700?text=Personaje2",
+              "https://via.placeholder.com/150/FFD700?text=Personaje3",
+              "https://via.placeholder.com/150/FFD700?text=Personaje4",
+              "https://via.placeholder.com/150/FFD700?text=Personaje5"
+            ]
+          },
+          {
+            nombre: "PERSONAJES",
+            imagen: "https://i.imgur.com/5pc5QzK.jpeg",
+            precios: [
+              "https://i.imgur.com/CTfmji2.jpeg",
+              "https://i.imgur.com/yFosOMa.jpeg",
+              "https://i.imgur.com/I2goapV.jpeg",
+              "https://i.imgur.com/kneT7uz.jpeg"
+            ]
+          },
+          {
+            nombre: "INFLABLES",
+            imagen: "https://i.imgur.com/5pc5QzK.jpeg",
+            precios: [
+              "https://i.imgur.com/CTfmji2.jpeg",
+              "https://i.imgur.com/yFosOMa.jpeg",
+              "https://i.imgur.com/I2goapV.jpeg",
+              "https://i.imgur.com/kneT7uz.jpeg"
+            ]
+          },
+          {
+            nombre: "ARMA TU PAQUETE",
+            imagen: "https://i.imgur.com/5pc5QzK.jpeg",
+            precios: [
+              "https://i.imgur.com/CTfmji2.jpeg",
+              "https://i.imgur.com/yFosOMa.jpeg",
+              "https://i.imgur.com/I2goapV.jpeg",
+              "https://i.imgur.com/kneT7uz.jpeg"
+            ]
+          }
+        ];
+        
+        const datos = cargarDatosDesdeURL();
+        if (datos.servicio && datos.servicio !== 'Todos los servicios') {
+          mostrarServicioSeleccionado();
+        } else {
+          mostrarTodosLosPrecios();
+        }
+      });
+    }
+
+    // Función para cargar los datos de la URL
+    function cargarDatosDesdeURL() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const municipio = urlParams.get('municipio') || 'No especificado';
+      const fecha = urlParams.get('fecha') || 'No especificada';
+      const servicio = urlParams.get('servicio') || 'Todos los servicios';
+
+      // Mostrar información en la página
+      document.getElementById('municipio-mostrar').textContent = municipio;
+      document.getElementById('fecha-mostrar').textContent = fecha;
+      document.getElementById('servicio-mostrar').textContent = servicio;
+
+      return { municipio, fecha, servicio };
+    }
+
+    // Función para mostrar todos los precios
+    function mostrarTodosLosPrecios() {
+      const contenedor = document.getElementById('contenedor-precios');
+      contenedor.innerHTML = '';
+
+      productos.forEach((producto, index) => {
+        const servicioDiv = document.createElement('div');
+        servicioDiv.className = 'servicio-precio';
+        
+        servicioDiv.innerHTML = `
+          <div class="titulo-servicio">${producto.nombre}</div>
+          <div class="galeria-precios">
+            ${producto.precios.map((precio, precioIndex) => `
+              <div class="imagen-precio" onclick="seleccionarPrecio('${producto.nombre}', '${precio}', ${index}, ${precioIndex})">
+                <img src="${precio}" alt="Precio ${precioIndex + 1} de ${producto.nombre}">
+                <div class="precio-info">
+                  <h4>Paquete ${precioIndex + 1}</h4>
+                  <p class="precio-texto"></p>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        `;
+        
+        contenedor.appendChild(servicioDiv);
+      });
+    }
+
+    // Función para mostrar solo el servicio seleccionado
+    function mostrarServicioSeleccionado() {
+      const contenedor = document.getElementById('contenedor-precios');
+      contenedor.innerHTML = '';
+      
+      const datos = cargarDatosDesdeURL();
+      const servicioSeleccionado = datos.servicio;
+      
+      // Buscar el producto correspondiente
+      const producto = productos.find(p => p.nombre === servicioSeleccionado);
+      
+      if (producto) {
+        const servicioDiv = document.createElement('div');
+        servicioDiv.className = 'servicio-precio';
+        
+        servicioDiv.innerHTML = `
+          <div class="titulo-servicio">${producto.nombre}</div>
+          <div class="galeria-precios">
+            ${producto.precios.map((precio, precioIndex) => `
+              <div class="imagen-precio" onclick="seleccionarPrecio('${producto.nombre}', '${precio}', ${productos.indexOf(producto)}, ${precioIndex})">
+                <img src="${precio}" alt="Paquete ${precioIndex + 1} de ${producto.nombre}">
+                <div class="precio-info">
+                  <h4>Paquete ${precioIndex + 1}</h4>
+                  
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        `;
+        
+        contenedor.appendChild(servicioDiv);
+      } else {
+        // Si no encuentra el servicio específico, mostrar todos
+        mostrarTodosLosPrecios();
+      }
+    }
+
+    // Función para seleccionar un precio y mostrar formulario
+    function seleccionarPrecio(nombreServicio, imagenPrecio, indexServicio, indexPaquete) {
+      const datos = cargarDatosDesdeURL();
+      
+      // Guardar en localStorage para el formulario de agendar
+      localStorage.setItem('servicioSeleccionado', nombreServicio);
+      localStorage.setItem('imagenSeleccionada', imagenPrecio);
+      localStorage.setItem('municipioSeleccionado', datos.municipio);
+      localStorage.setItem('fechaSeleccionada', datos.fecha);
+      localStorage.setItem('paqueteSeleccionado', `Paquete ${indexPaquete + 1}`);
+      
+      // Mostrar información del paquete seleccionado
+      const infoSeleccion = document.getElementById('info-seleccion');
+      infoSeleccion.innerHTML = `
+        <h4>📋 Paquete Seleccionado:</h4>
+        <p><strong>Servicio:</strong> ${nombreServicio}</p>
+        <p><strong>Paquete:</strong> Paquete ${indexPaquete + 1}</p>
+        <p><strong>Municipio:</strong> ${datos.municipio}</p>
+        <p><strong>Fecha:</strong> ${datos.fecha}</p>
+      `;
+      
+      // Mostrar formulario de agendar
+      document.getElementById('formulario-agendar').style.display = 'block';
+      
+      // Hacer scroll suave hasta el formulario
+      setTimeout(() => {
+        document.getElementById('formulario-agendar').scrollIntoView({ 
+          behavior: 'smooth', 
+          block: 'center' 
+        });
+      }, 100);
+    }
+
+    // Función para cerrar formulario
+    function cerrarFormulario() {
+      document.getElementById('formulario-agendar').style.display = 'none';
+    }
+
+    // Función para obtener ubicación
+    function obtenerUbicacion() {
+      if ("geolocation" in navigator) {
+        navigator.geolocation.getCurrentPosition((position) => {
+          const lat = position.coords.latitude;
+          const lon = position.coords.longitude;
+          document.getElementById("ubicacion").value = `https://www.google.com/maps?q=${lat},${lon}`;
+          alert("📍 Ubicación obtenida correctamente.");
+        }, () => {
+          alert("⚠️ No se pudo obtener la ubicación.");
+        });
+      } else {
+        alert("Tu navegador no soporta geolocalización.");
+      }
+    }
+
+    // Función para ver mi evento agendado
+    function verMiEventoAgendado() {
+      // Elimina cualquier resumen anterior
+      const resumenAnterior = document.getElementById('resumen-mi-evento');
+      if (resumenAnterior) resumenAnterior.remove();
+
+      // Obtener datos del evento desde localStorage
+      let datos = null;
+      try {
+        datos = JSON.parse(localStorage.getItem('usuarioEvento'));
+      } catch (e) {
+        datos = null;
+      }
+      const tipo = localStorage.getItem('servicioSeleccionado') || 'No especificado';
+      const paquete = localStorage.getItem('paqueteSeleccionado') || 'No especificado';
+      const municipio = localStorage.getItem('municipioSeleccionado') || 'No especificado';
+      const imagen = localStorage.getItem('imagenSeleccionada') || '';
+
+      // Validar datos
+      const persona = datos && datos.nombre ? datos.nombre : '';
+      const telefono = datos && datos.telefono ? datos.telefono : '';
+      const fecha = datos && datos.fechaEvento ? datos.fechaEvento : '';
+
+      // Si no hay datos, muestra un mensaje amigable
+      if (!persona || !telefono || !fecha) {
+        const resumen = document.createElement('div');
+        resumen.id = 'resumen-mi-evento';
+        resumen.style.margin = '40px auto';
+        resumen.style.maxWidth = '500px';
+        resumen.style.background = 'linear-gradient(135deg, #fff0f5 0%, #ffe6f0 100%)';
+        resumen.style.borderRadius = '25px';
+        resumen.style.boxShadow = '0 8px 32px rgba(255,105,180,0.18)';
+        resumen.style.padding = '32px 24px 24px 24px';
+        resumen.style.textAlign = 'center';
+        resumen.innerHTML = `
+          <h3 style='color:#ff69b4;margin-bottom:18px;'>📋 No hay evento agendado para mostrar</h3>
+          <p style='color:#666;margin-bottom:20px;'>Por favor agenda un evento primero para poder ver los detalles.</p>
+          <div style='margin-top:24px;display:flex;gap:12px;justify-content:center;flex-wrap:wrap;'>
+            <button class='btn-nuevo-evento' onclick='agendarNuevoEvento()'>🎈 Agendar evento</button>
+            <button class='btn-regresar-principal' onclick='regresarPrincipal()'>🏠 Regresar a productos</button>
+          </div>
+        `;
+        document.getElementById('mensaje-confirmacion').after(resumen);
+        return;
+      }
+
+      // Crear el resumen visual mejorado
+      const resumen = document.createElement('div');
+      resumen.id = 'resumen-mi-evento';
+      resumen.style.margin = '40px auto';
+      resumen.style.maxWidth = '600px';
+      resumen.style.background = 'linear-gradient(135deg, #fff0f5 0%, #ffe6f0 100%)';
+      resumen.style.borderRadius = '25px';
+      resumen.style.boxShadow = '0 8px 32px rgba(255,105,180,0.18)';
+      resumen.style.padding = '32px 24px 24px 24px';
+      resumen.style.textAlign = 'center';
+      resumen.innerHTML = `
+        <h3 style='color:#ff69b4;margin-bottom:18px;font-size:24px;'>📋 Detalles de tu evento agendado</h3>
+        ${imagen ? `<img src='${imagen}' alt='Imagen del paquete' style='width:150px;border-radius:18px;margin-bottom:20px;box-shadow:0 4px 16px #ffb6c1;'>` : ''}
+        <div style='background:rgba(255,182,193,0.1);padding:20px;border-radius:15px;margin:20px 0;border:2px solid rgba(255,105,180,0.2);'>
+          <p style='margin:8px 0;color:#d63384;font-weight:bold;'><strong>👤 Nombre:</strong> ${persona}</p>
+          <p style='margin:8px 0;color:#d63384;font-weight:bold;'><strong>📱 Teléfono:</strong> ${telefono}</p>
+          <p style='margin:8px 0;color:#d63384;font-weight:bold;'><strong>📅 Fecha:</strong> ${fecha}</p>
+          <p style='margin:8px 0;color:#d63384;font-weight:bold;'><strong>🎪 Servicio:</strong> ${tipo}</p>
+          <p style='margin:8px 0;color:#d63384;font-weight:bold;'><strong>📦 Paquete:</strong> ${paquete}</p>
+          <p style='margin:8px 0;color:#d63384;font-weight:bold;'><strong>📍 Municipio:</strong> ${municipio}</p>
+        </div>
+        <p style='color:#666;font-style:italic;margin:20px 0;'>🎉 ¡Tu evento está confirmado! Nos pondremos en contacto contigo pronto.</p>
+        <div style='margin-top:30px;display:flex;gap:15px;justify-content:center;flex-wrap:wrap;'>
+          <button class='btn-nuevo-evento' onclick='agendarNuevoEvento()'>🎈 Agendar otro evento</button>
+          <button class='btn-regresar-principal' onclick='regresarPrincipal()'>🏠 Regresar a productos</button>
+        </div>
+      `;
+      // Insertar el resumen después del mensaje de confirmación
+      document.getElementById('mensaje-confirmacion').after(resumen);
+    }
+
+    // Función para agendar nuevo evento
+    function agendarNuevoEvento() {
+      // Ocultar mensajes de confirmación y resumen
+      document.getElementById('mensaje-confirmacion').style.display = 'none';
+      const resumenAnterior = document.getElementById('resumen-mi-evento');
+      if (resumenAnterior) resumenAnterior.remove();
+      
+      // Limpiar todos los datos del localStorage
+      localStorage.removeItem('municipioSeleccionado');
+      localStorage.removeItem('fechaSeleccionada');
+      localStorage.removeItem('imagenSeleccionada');
+      localStorage.removeItem('servicioSeleccionado');
+      localStorage.removeItem('paqueteSeleccionado');
+      localStorage.removeItem('usuarioEvento');
+      
+      // Mostrar mensaje de confirmación
+      alert('🎈 ¡Perfecto! Te llevamos a la página de productos para que puedas agendar tu nuevo evento.');
+      
+      // Redirigir a la página de productos
+      window.location.href = 'productos.html';
+    }
+
+    // Función para regresar a la página principal
+    function regresarPrincipal() {
+      // Ocultar mensajes de confirmación y resumen
+      document.getElementById('mensaje-confirmacion').style.display = 'none';
+      const resumenAnterior = document.getElementById('resumen-mi-evento');
+      if (resumenAnterior) resumenAnterior.remove();
+      
+      // Mostrar mensaje de despedida
+      alert('🏠 ¡Gracias por confiar en PINKI DINKIS! Te llevamos de regreso a la página de productos.');
+      
+      // Redirigir a la página de productos
+      window.location.href = 'productos.html';
+    }
+
+    // Manejar envío del formulario
+    document.getElementById('form-agendar').addEventListener('submit', function(e) {
+      e.preventDefault();
+
+      const evento = {
+        persona: document.getElementById('persona').value,
+        telefono1: document.getElementById('telefono1').value,
+        telefono2: document.getElementById('telefono2').value,
+        hora: document.getElementById('hora').value,
+        tematica: document.getElementById('tematica').value,
+        festejados: document.getElementById('festejados').value,
+        genero: document.getElementById('genero').value,
+        direccion: document.getElementById('direccion').value,
+        especificaciones: document.getElementById('especificaciones').value,
+        ubicacion: document.getElementById('ubicacion').value,
+        tipo: localStorage.getItem('servicioSeleccionado') || 'No definido',
+        paquete: localStorage.getItem('paqueteSeleccionado') || 'No definido',
+        municipio: localStorage.getItem('municipioSeleccionado') || 'No definido',
+        fecha: localStorage.getItem('fechaSeleccionada') || 'No definida',
+        imagenSeleccionada: localStorage.getItem('imagenSeleccionada') || '',
+        fechaCreacion: new Date().toISOString()
+      };
+
+      // Guardar en Firebase
+      db.ref('eventosAgendados').push(evento)
+        .then(() => {
+          // Ocultar formulario y mostrar mensaje de confirmación
+          document.getElementById('formulario-agendar').style.display = 'none';
+          document.getElementById('mensaje-confirmacion').style.display = 'flex';
+          
+          // Limpiar formulario
+          document.getElementById('form-agendar').reset();
+          
+          // Guardar datos del usuario para acceso posterior
+          localStorage.setItem('usuarioEvento', JSON.stringify({
+            nombre: evento.persona,
+            telefono: evento.telefono1,
+            fechaEvento: evento.fecha
+          }));
+        })
+        .catch(error => {
+          alert('❌ Error al agendar: ' + error.message);
+        });
+    });
+
+    // Inicializar la página
+    window.onload = function() {
+      cargarProductosDesdeFirebase();
+    };
+
+    document.addEventListener('DOMContentLoaded', function() {
+      const galeria = document.getElementById('galeria-precios');
+      if (galeria) {
+        galeria.innerHTML = '<div id="loader-precios" style="text-align:center;margin:20px;">Cargando precios...</div>';
+        setTimeout(() => {
+          const loader = document.getElementById('loader-precios');
+          if (loader) loader.remove();
+        }, 800);
+      }
+    });
+  </script>
+</body>
+</html>
