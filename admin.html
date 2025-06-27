@@ -848,63 +848,71 @@
       ]
     };
 
-    // Cargar galería desde localStorage o usar default
-    function cargarGaleriaAdmin() {
-      const data = localStorage.getItem('galeriaAdmin');
-      return data ? JSON.parse(data) : JSON.parse(JSON.stringify(galeriaDefault));
+    // Cargar galería desde Firebase o usar default
+    function cargarGaleriaAdmin(callback) {
+      database.ref('galeria').once('value').then(snapshot => {
+        const data = snapshot.val();
+        if (data) {
+          callback(data);
+        } else {
+          callback(JSON.parse(JSON.stringify(galeriaDefault)));
+        }
+      });
     }
     function guardarGaleriaAdmin(galeria) {
-      localStorage.setItem('galeriaAdmin', JSON.stringify(galeria));
+      database.ref('galeria').set(galeria);
     }
 
     function renderGaleriaAdmin() {
-      const galeria = cargarGaleriaAdmin();
-      const cont = document.getElementById('galeria-admin');
-      cont.innerHTML = '';
-      categoriasGaleria.forEach(cat => {
-        const div = document.createElement('div');
-        div.style.marginBottom = '32px';
-        div.innerHTML = `<h3 style='color:#d63384;'>${cat.nombre}</h3>`;
-        // Galería de imágenes
-        const galDiv = document.createElement('div');
-        galDiv.style.display = 'flex';
-        galDiv.style.flexWrap = 'wrap';
-        galDiv.style.gap = '16px';
-        galeria[cat.key].forEach((url, idx) => {
-          const imgBox = document.createElement('div');
-          imgBox.style.position = 'relative';
-          imgBox.style.display = 'inline-block';
-          imgBox.innerHTML = `
-            <img src='${url}' style='width:100px;height:100px;object-fit:cover;border-radius:10px;box-shadow:0 2px 8px #ffb6c1;'>
-            <button style='position:absolute;top:2px;right:2px;background:#ff69b4;color:white;border:none;border-radius:50%;width:22px;height:22px;cursor:pointer;font-weight:bold;' title='Eliminar'>&times;</button>
+      cargarGaleriaAdmin(function(galeria) {
+        const cont = document.getElementById('galeria-admin');
+        cont.innerHTML = '';
+        categoriasGaleria.forEach(cat => {
+          const div = document.createElement('div');
+          div.style.marginBottom = '32px';
+          div.innerHTML = `<h3 style='color:#d63384;'>${cat.nombre}</h3>`;
+          // Galería de imágenes
+          const galDiv = document.createElement('div');
+          galDiv.style.display = 'flex';
+          galDiv.style.flexWrap = 'wrap';
+          galDiv.style.gap = '16px';
+          (galeria[cat.key] || []).forEach((url, idx) => {
+            const imgBox = document.createElement('div');
+            imgBox.style.position = 'relative';
+            imgBox.style.display = 'inline-block';
+            imgBox.innerHTML = `
+              <img src='${url}' style='width:100px;height:100px;object-fit:cover;border-radius:10px;box-shadow:0 2px 8px #ffb6c1;'>
+              <button style='position:absolute;top:2px;right:2px;background:#ff69b4;color:white;border:none;border-radius:50%;width:22px;height:22px;cursor:pointer;font-weight:bold;' title='Eliminar'>&times;</button>
+            `;
+            imgBox.querySelector('button').onclick = () => {
+              galeria[cat.key].splice(idx, 1);
+              guardarGaleriaAdmin(galeria);
+              renderGaleriaAdmin();
+            };
+            galDiv.appendChild(imgBox);
+          });
+          div.appendChild(galDiv);
+          // Formulario para agregar imagen
+          const form = document.createElement('form');
+          form.style.marginTop = '10px';
+          form.innerHTML = `
+            <input type='url' placeholder='URL de la imagen' required style='padding:6px 10px;border-radius:8px;border:1px solid #ffb6c1;width:220px;'>
+            <button type='submit' style='background:#ff69b4;color:white;border:none;padding:7px 18px;border-radius:8px;font-weight:bold;margin-left:8px;cursor:pointer;'>Agregar</button>
           `;
-          imgBox.querySelector('button').onclick = () => {
-            galeria[cat.key].splice(idx, 1);
-            guardarGaleriaAdmin(galeria);
-            renderGaleriaAdmin();
+          form.onsubmit = e => {
+            e.preventDefault();
+            const url = form.querySelector('input').value.trim();
+            if (url) {
+              if (!galeria[cat.key]) galeria[cat.key] = [];
+              galeria[cat.key].push(url);
+              guardarGaleriaAdmin(galeria);
+              renderGaleriaAdmin();
+              form.reset();
+            }
           };
-          galDiv.appendChild(imgBox);
+          div.appendChild(form);
+          cont.appendChild(div);
         });
-        div.appendChild(galDiv);
-        // Formulario para agregar imagen
-        const form = document.createElement('form');
-        form.style.marginTop = '10px';
-        form.innerHTML = `
-          <input type='url' placeholder='URL de la imagen' required style='padding:6px 10px;border-radius:8px;border:1px solid #ffb6c1;width:220px;'>
-          <button type='submit' style='background:#ff69b4;color:white;border:none;padding:7px 18px;border-radius:8px;font-weight:bold;margin-left:8px;cursor:pointer;'>Agregar</button>
-        `;
-        form.onsubmit = e => {
-          e.preventDefault();
-          const url = form.querySelector('input').value.trim();
-          if (url) {
-            galeria[cat.key].push(url);
-            guardarGaleriaAdmin(galeria);
-            renderGaleriaAdmin();
-            form.reset();
-          }
-        };
-        div.appendChild(form);
-        cont.appendChild(div);
       });
     }
     renderGaleriaAdmin();
